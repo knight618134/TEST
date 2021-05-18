@@ -1,35 +1,57 @@
+import axios from "axios";
 const state = {
-  searchDate: '',
-  currentRelationId : ''
-}
+  todos: [],
+  currentRelationId: "",
+};
 
 const getters = {
-  searchDate: state => state.searchDate,
-  currentRelationId: state => state.currentRelationId,
-}
+  todos: (state) => state.todos,
+};
 
 const actions = {
-  setSearchDate ({ commit }, date = '') {
-    commit('SET_SEARCH_DATE', date)
+  getTodoData({ commit }, data = []) {
+    axios.get("http://localhost:3000/todos").then((res) => {
+      data = res.data;
+      commit("GET_TODO_DATA", data);
+    });
   },
-  setCurrnetRelationId ({commit}, id = '') {
-    commit('SET_CURRENT_RELATIONID',id)
-  }
-}
+  addTodoData({ dispatch }, data = {}) {
+    axios.post("http://localhost:3000/todos", data).then(() => {
+      dispatch("getTodoData");
+    });
+  },
+  changeTodoData({ dispatch }, data = {}) {
+    const {id} = data
+    axios
+      .put(`http://localhost:3000/todos/${id}`, data)
+      .then(() => {
+        dispatch("getTodoData");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  },
+  deleteTodoData({ dispatch }, id = "") {
+    axios
+      .delete(`http://localhost:3000/todos/${id}`)
+      .then(() => {
+        dispatch("getTodoData");
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  },
+};
 
 const mutations = {
-  SET_SEARCH_DATE (state, date = '') {
-    state.searchDate = date
+  GET_TODO_DATA(state, data = []) {
+    state.todos = data;
   },
-  SET_CURRENT_RELATIONID(state,id='') {
-    state.currentRelationId = id
-  }
-}
-
+};
 
 export default {
   state,
   getters,
   actions,
-  mutations
-}
+  mutations,
+};
